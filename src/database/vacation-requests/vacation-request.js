@@ -1,5 +1,5 @@
 const Sequelize = require('sequelize');
-const sequelize = require('../../util/database');
+const sequelize = require('../database');
 const { dateUtil } = require('@abujude/sgs-khadamati');
 const vacationRequestTrack = require('./vacation-request-track');
 const vacationRequestAttachment = require('./vacation-request-attachment');

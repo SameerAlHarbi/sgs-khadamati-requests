@@ -1,8 +1,7 @@
 const Sequelize = require("sequelize");
-const sequelize = require('../../util/database');
+const sequelize = require('../../db-client');
 
 class EmployeeRequestTrack extends Sequelize.Model {
-
 
 }
 
@@ -10,8 +9,8 @@ module.exports = EmployeeRequestTrack.init({
     id: {
         type: Sequelize.INTEGER
         , allowNull: false
-        , primaryKey: true
         , autoIncrement: true
+        , primaryKey: true
     }
     , date:{
         type: Sequelize.DATE
@@ -25,13 +24,20 @@ module.exports = EmployeeRequestTrack.init({
             min: { args: [1], msg: 'Invalid employee id!' }
         }
     }
-    , employeeRole: {
-        type: Sequelize.STRING
-        , allowNull: false
-    }
     , employeePosition: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(100)
         , allowNull: true
+    }
+    , trackRoleNumber: {
+        type: Sequelize.INTEGER
+        , allowNull: false
+        , validate: {
+            min: 0
+        }
+    }
+    , trackRoleName: {
+        type: Sequelize.STRING(50)
+        , allowNull: false
     }
     , accept: {
         type: Sequelize.BOOLEAN
@@ -53,7 +59,7 @@ module.exports = EmployeeRequestTrack.init({
         }
     }    
     , originalEmployeePosition: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING(100)
         , allowNull: true
     }
     , responseBy: {

@@ -1,20 +1,23 @@
 const Sequelize = require('sequelize');
-const sequelize = require('../../util/database');
-const employeeRequestAttachment = require('./employee-request-attachment');
+const sequelize = require('../../db-client');
 const employeeRequestTrack = require('./employee-request-track');
+const employeeRequestAttachment = require('./employee-request-attachment');
+const employeeCommissioning = require('./employee-commissioning');
+const vacationRequest = require('./vacation-request');
+const { dateUtil } = require('@abujude/sgs-khadamati');
 
 class EmployeeRequest extends Sequelize.Model {
 
-    get requestDateText() {
-        return 'ok'
+    get dateText() {
+        return dateUtil.formatDate(this.date);
     }
 }
 
 const employeeRequest = EmployeeRequest.init({
     id: {
         type: Sequelize.INTEGER
-        , autoIncrement: true
         , allowNull: false
+        , autoIncrement: true
         , primaryKey: true
     }
     , date: {
@@ -36,8 +39,21 @@ const employeeRequest = EmployeeRequest.init({
         }
     }
     , requestType:{
-        type: Sequelize.STRING
+        type: Sequelize.ENUM
+        , values: [
+            'Vacation'
+            , 'Delegation'
+            , 'Commissioning'
+            , 'Excuse'
+            , 'Overtime'
+        ]
+        , defaultValue: 'Vacation'
         , allowNull: false
+        , validate: {
+            notEmpty: {
+                msg: 'Invalid request type'
+            }
+        }
     }
     , status: {
         type: Sequelize.ENUM
@@ -53,16 +69,30 @@ const employeeRequest = EmployeeRequest.init({
         , allowNull: false
         , defaultValue: 'Pending'
         , validate : {
-            notNull: {
+            notEmpty: {
                 msg: 'Invalid request status!'
             }
         }
     }
-    , requesteBy: {
+    , requestBy: {
         type: Sequelize.INTEGER
         , allowNull: false
         , validate: {
             min: { args: [1], msg: 'Invalid request by employee id!' }
+        }
+    }
+    , requestByRole: {
+        type: Sequelize.ENUM
+        , values: [
+            'Employee'
+            , 'HR'
+            , 'Manager'
+            , 'Admin'
+        ]
+        , defaultValue: 'Employee'
+        , allowNull: false
+        , validate: {
+            notEmpty: true
         }
     }
     , note: {
@@ -79,27 +109,50 @@ const employeeRequest = EmployeeRequest.init({
 
 employeeRequest.hasMany(employeeRequestTrack, {
     foreignKey: 'employeeRequestId'
-    , onDelete: 'CASCADE'
     , onUpdate: 'CASCADE' 
+    , onDelete: 'CASCADE'
 });
 
 employeeRequestTrack.belongsTo(employeeRequest,{
     foreignKey: 'employeeRequestId'
-    , onDelete: 'CASCADE'
     , onUpdate: 'CASCADE' 
+    , onDelete: 'CASCADE'
 });
 
 employeeRequest.hasMany(employeeRequestAttachment, {
     foreignKey: 'employeeRequestId'
-    , onDelete: 'CASCADE'
     , onUpdate: 'CASCADE' 
+    , onDelete: 'CASCADE'
 });
 
 employeeRequestAttachment.belongsTo(employeeRequest,{
     foreignKey: 'employeeRequestId'
-    , onDelete: 'CASCADE'
-    , onUpdate: 'CASCADE' 
+    , onUpdate: 'CASCADE'
+    , onDelete: 'CASCADE' 
 });
 
+employeeRequest.hasOne(vacationRequest, {
+    foreignKey: 'employeeRequestId'
+    , onUpdate: 'CASCADE'
+    , onDelete: 'CASCADE'
+});
+
+vacationRequest.belongsTo(employeeRequest, {
+    foreignKey: 'employeeRequestId'
+    , onUpdate: 'CASCADE'
+    , onDelete: 'CASCADE'
+});
+
+employeeRequest.hasMany(employeeCommissioning, {
+    foreignKey: 'employeeRequestId'
+    , onUpdate: 'CASCADE'
+    , onDelete: 'CASCADE'
+});
+
+employeeCommissioning.belongsTo(employeeRequest, {
+    foreignKey: 'employeeRequestId'
+    , onUpdate: 'CASCADE'
+    , onDelete: 'CASCADE'
+});
 
 module.exports = employeeRequest;

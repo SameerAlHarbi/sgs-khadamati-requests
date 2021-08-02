@@ -12,8 +12,8 @@ const vacationsRequestsRouter = require('./routers/vacations-requests.router');
 const errorsController = require('./controllers/errors.controller');
 
 //Database
-const sequelize = require('./util/database');
-require('./db-models/employee-request/employee-request');
+const sequelize = require('./database/db-client');
+require('./database/model/index');
 
 //Express server
 const app = express();
