@@ -17,6 +17,45 @@ exports.getAllVacationsRequests = async (req, res, next) => {
     }
 }
 
+validateVacationRequest = async (vacationRequest) => {
+
+    let validationMessage = '';
+
+    if(!vacationRequest) {
+        validationMessage = 'Invalid vacation!';
+    } else if(!vacationRequest.startDate) {
+        validationMessage = 'Invalid vacation start date!';
+    } else if(!vacationRequest.endDate) {
+        validationMessage = 'Invalid vacation end date!';
+    } else if (isNaN(vacationRequest.employeeId)) {
+        validationMessage = 'Invalid employee id!';
+    } else if(!vacationRequest.vacationTypeId || vacationRequest.vacationTypeId.trim() === "") {
+        validationMessage = 'Invalid vacation type id!';
+    } else if (isNaN(vacationRequest.requestBy)) {
+        validationMessage = 'Invalid request by employee id!';
+    } else if (isNaN(vacationRequest.requestByRole)) {
+        validationMessage = 'Invalid employee id!';
+    }
+
+    if (validationMessage === '') {
+        if(vacationRequest.endDate < vacationRequest.startDate) {
+            validationMessage = 'Invalid vacation end date!';
+        } 
+    }
+
+    let badRequest = true;
+
+    if(validationMessage === '' ) {
+        badRequest = false;
+        const result = await 
+        vacationsRequestsManager.validateVacationRequest(vacationRequest);
+        
+        validationMessage = result.validationMessage;
+    }
+
+    return { message: validationMessage, badRequest, result : validationMessage === ''};
+}
+
 exports.createVacationRequest = async (req, res, next) => {
     const lang = req.query.lang;
     const newVacationRequest = req.body;
